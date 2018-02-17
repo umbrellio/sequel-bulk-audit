@@ -1,8 +1,10 @@
 Description:
-    Explain the generator
+    The generator inserts sequel migration
+    This migration contains trigger.
+    You can attach the trigger to tables here.
 
 Example:
-    rails generate migration Thing
+    rails generate audit_miogration
 
     This will create:
         what/will/it/create
