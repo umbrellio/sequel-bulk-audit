@@ -1,6 +1,6 @@
 module Sequel
-  module Bulk
-    module Audit
+  module Plugins
+    module BulkAudit
       VERSION = "0.1.0"
     end
   end
