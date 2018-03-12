@@ -31,7 +31,7 @@ RSpec.describe Sequel::Plugins::BulkAudit do
     expect(model.count).to eq(6)
   end
 
-  it "destroys data" do
+  it "creates data" do
     model.with_current_user(current_user) do
       model.create(value: 5)
     end

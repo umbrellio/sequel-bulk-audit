@@ -36,7 +36,7 @@ You can exdend this migration by attaching the trigger to audited tables.
 
 ## Usage
 
-Model changes in which you plan to audit should contain
+Models, changes in which you plan to audit should contain
 ```ruby
 plugin :bulk_audit
 ```
