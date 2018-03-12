@@ -12,7 +12,7 @@ module Sequel
 
       module SharedMethods
         def model_to_table_map
-          @model_to_table_map ||= ObjectSpace.each_object(Class).select do |klazz|
+          @@model_to_table_map ||= ObjectSpace.each_object(Class).select do |klazz|
             next if klazz.name.nil?
             klazz < Sequel::Model && klazz&.plugins&.include?(Sequel::Plugins::BulkAudit)
           end.map { |c| [c, c.table_name] }.to_h.invert
