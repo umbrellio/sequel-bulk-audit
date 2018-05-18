@@ -29,8 +29,9 @@ module Sequel
                              Sequel.pg_jsonb(model_to_table_map).as(:model_map),
                              Sequel.pg_jsonb(attributes || {}).as(:data))
             self.db.create_table!(:__audit_info, temp: true, as: data)
-            yield if block_given?
+            result = yield if block_given?
             self.db.drop_table?(:__audit_info)
+            result
           end
         end
       end
