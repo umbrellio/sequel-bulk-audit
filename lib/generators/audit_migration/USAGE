@@ -4,7 +4,7 @@ Description:
     You can attach the trigger to tables here.
 
 Example:
-    rails generate audit_miogration
+    rails generate audit_migration
 
     This will create:
         what/will/it/create
