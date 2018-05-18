@@ -112,10 +112,11 @@ RSpec.describe Sequel::Plugins::BulkAudit do
       one_to_many :audit_logs, as: :model
     end
     MyData.class_variable_set(:@@model_to_table_map, nil)
-    rec = nil
-    model.with_current_user(current_user) do
-      rec = MyData.create(value: 5)
+    rec = model.with_current_user(current_user) do
+      MyData.create(value: 5)
     end
+    expect(rec).to be_instance_of(MyData)
+
     expect(DB[:audit_logs].all).to include(
       a_hash_including(
         event: "INSERT",
