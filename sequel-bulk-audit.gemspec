@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.description   = %q{Every update on audited table will be logged. You can update the table in bulk}
   spec.homepage      = "https://github.com/fiscal-cliff/sequel-bulk-audit/"
   spec.post_install_message = %q{ Next steps:
-    1. Run rails g audit_install
+    1. Run rails g audit_migration
     2. Edit generated migration
     3. Apply the migration"
   }

@@ -30,7 +30,7 @@ Or install it yourself as:
 
     $ gem install sequel-bulk-audit
 
-After Installation you should run ```rails g audit_install``` generator.
+After Installation you should run ```rails g audit_migration``` generator.
 
 You can exdend this migration by attaching the trigger to audited tables.
 
