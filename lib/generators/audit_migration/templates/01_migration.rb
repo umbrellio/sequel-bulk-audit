@@ -29,8 +29,10 @@ Sequel.migration do
         __audit_info RECORD;
         model_id text;
         return_record RECORD;
+        trid bigint;
       BEGIN
-        SELECT * FROM __audit_info INTO __audit_info;
+        SELECT txid_current() INTO trid;
+        EXECUTE 'SELECT * FROM __audit_info_' || trid::text INTO __audit_info;
         FOR ri IN
           SELECT column_name
           FROM information_schema.columns
