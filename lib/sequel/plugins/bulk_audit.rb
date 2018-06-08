@@ -21,7 +21,6 @@ module Sequel
         def with_current_user(current_user, attributes = nil)
           self.db.transaction do
             trid = self.db.select(Sequel.function(:txid_current)).single_value
-            self.db.drop_table?(:"__audit_info_#{trid}")
             data = self.db.select(Sequel.expr(current_user&.id || 0).as(:user_id),
                              Sequel.cast(current_user&.login || "unspecified", :text).as(:username),
                              Sequel.pg_jsonb(model_to_table_map).as(:model_map),
