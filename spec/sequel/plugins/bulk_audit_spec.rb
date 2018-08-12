@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-require "pry"
-
 RSpec.describe Sequel::Plugins::BulkAudit do
   before(:all) do
     Sequel::Model.plugin :bulk_audit
