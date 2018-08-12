@@ -58,3 +58,15 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/fiscal-cliff/sequel-bulk-audit.
+
+## License
+
+Released under MIT License.
+
+## Authors
+
+Created by [fiscal-cliff](https://github.com/fiscal-cliff)
+
+<a href="https://github.com/umbrellio/">
+<img style="float: left;" src="https://umbrellio.github.io/Umbrellio/supported_by_umbrellio.svg" alt="Supported by Umbrellio" width="439" height="72">
+</a>
