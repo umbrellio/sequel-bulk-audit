@@ -14,10 +14,12 @@ module Sequel
 
       module SharedMethods
         def model_to_table_map
+          # rubocop:disable Style/ClassVars, Style/MultilineBlockChain
           @@model_to_table_map ||= ObjectSpace.each_object(Class).select do |klazz|
             next if klazz.name.nil?
             klazz < Sequel::Model && klazz&.plugins&.include?(Sequel::Plugins::BulkAudit)
           end.map { |c| [c.to_s, c.table_name] }.to_h.invert
+          # rubocop:enable Style/ClassVars, Style/MultilineBlockChain
         end
 
         def with_current_user(current_user, attributes = nil)

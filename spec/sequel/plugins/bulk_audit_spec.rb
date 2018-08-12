@@ -1,11 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Sequel::Plugins::BulkAudit do
-  before(:all) do
-    Sequel::Model.plugin :bulk_audit
-  end
-
   before do
+    Sequel::Model.plugin :bulk_audit
     DB.tables.include?(:audit_logs) && DB[:audit_logs].truncate
   end
 

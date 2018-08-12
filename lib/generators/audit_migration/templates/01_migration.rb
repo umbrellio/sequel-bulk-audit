@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/LineLength
 Sequel.migration do
   up do
     create_table(:audit_logs) do
@@ -91,3 +92,4 @@ Sequel.migration do
     drop_table(:audit_logs)
   end
 end
+# rubocop:enable Metrics/LineLength
