@@ -6,6 +6,8 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "sequel/plugins/bulk_audit/version"
 
 Gem::Specification.new do |spec|
+  spec.required_ruby_version = '>= 2.3.7'
+
   spec.name        = "sequel-bulk-audit"
   spec.version     = Sequel::Plugins::BulkAudit::VERSION
   spec.authors     = ["Fox"]
