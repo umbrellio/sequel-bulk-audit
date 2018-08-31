@@ -1,21 +1,17 @@
-require "spec_helper"
-require 'pry'
+# frozen_string_literal: true
 
 RSpec.describe Sequel::Plugins::BulkAudit do
-  before(:all) do
-    Sequel::Model.plugin :bulk_audit
-  end
-
   before do
+    Sequel::Model.plugin :bulk_audit
     DB.tables.include?(:audit_logs) && DB[:audit_logs].truncate
   end
 
-  let!(:audit_model) {
+  let!(:audit_model) do
     class AuditLog < Sequel::Model
       plugin :polymorphic
       many_to_one :model, polymorphic: true
     end
-  }
+  end
 
   let!(:model) do
     Class.new(Sequel::Model(:data)) do
@@ -24,7 +20,7 @@ RSpec.describe Sequel::Plugins::BulkAudit do
   end
 
   let!(:current_user) do
-    OpenStruct.new(login: 'UserLogin', id: 1)
+    OpenStruct.new(login: "UserLogin", id: 1)
   end
 
   it "prepares data" do
@@ -44,10 +40,10 @@ RSpec.describe Sequel::Plugins::BulkAudit do
         query: a_string_starting_with("INSERT"),
         changed: an_object_having_attributes(
           to_h: a_hash_including(
-            "value" => "5"
-          )
-        )
-      )
+            "value" => "5",
+          ),
+        ),
+      ),
     )
     model.with_current_user(current_user) do
       model.last.destroy
@@ -61,16 +57,16 @@ RSpec.describe Sequel::Plugins::BulkAudit do
         query: a_string_starting_with("DELETE"),
         changed: an_object_having_attributes(
           to_h: a_hash_including(
-            "value" => "5"
-          )
-        )
-      )
+            "value" => "5",
+          ),
+        ),
+      ),
     )
   end
 
   it "updates data" do
     model.with_current_user(current_user) do
-      model.where("1=1".lit).update(value: 'new_value')
+      model.where("1=1".lit).update(value: "new_value")
     end
     expect(DB[:audit_logs].count).to eq(6)
     expect(DB[:audit_logs].all).to include(
@@ -81,9 +77,9 @@ RSpec.describe Sequel::Plugins::BulkAudit do
         query: a_string_starting_with("UPDATE"),
         changed: an_object_having_attributes(
           to_h: a_hash_including(
-            "value" => ["3", "new_value"]
-          )
-        )
+            "value" => %w[3 new_value],
+          ),
+        ),
       ),
       a_hash_including(
         event: "UPDATE",
@@ -92,10 +88,10 @@ RSpec.describe Sequel::Plugins::BulkAudit do
         query: a_string_starting_with("UPDATE"),
         changed: an_object_having_attributes(
           to_h: a_hash_including(
-            "value" => ["4", "new_value"]
-          )
-        )
-      )
+            "value" => %w[4 new_value],
+          ),
+        ),
+      ),
     )
   end
 
@@ -122,15 +118,15 @@ RSpec.describe Sequel::Plugins::BulkAudit do
         event: "INSERT",
         username: "UserLogin",
         user_type: "User",
-        model_type: 'MyData',
+        model_type: "MyData",
         model_id: rec.id.to_s,
         query: a_string_starting_with("INSERT"),
         changed: an_object_having_attributes(
           to_h: a_hash_including(
-            "value" => "5"
-          )
-        )
-      )
+            "value" => "5",
+          ),
+        ),
+      ),
     )
     expect(AuditLog.all.first.model.value).to eq("5")
     expect(AuditLog.all.first.model.id).to eq(rec.id)

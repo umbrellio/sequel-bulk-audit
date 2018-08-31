@@ -1,0 +1,16 @@
+inherit_gem:
+  rubocop-config-umbrellio: lib/rubocop.yml
+
+AllCops:
+  DisplayCopNames: true
+  TargetRubyVersion: 2.4
+
+Gemspec/OrderedDependencies:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Max: 35
+
+Naming/FileName:
+  Exclude:
+    - lib/sequel-bulk-audit.rb
