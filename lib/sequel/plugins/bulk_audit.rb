@@ -25,9 +25,8 @@ module Sequel
                              Sequel.cast(current_user&.login || "unspecified", :text).as(:username),
                              Sequel.pg_jsonb(model_to_table_map).as(:model_map),
                              Sequel.pg_jsonb(attributes || {}).as(:data))
-            self.db.create_table!(:"__audit_info_#{trid}", temp: true, as: data)
+            self.db.create_table!(:"__audit_info_#{trid}", temp: true, on_commit: :drop, as: data)
             result = yield if block_given?
-            self.db.drop_table?(:"__audit_info_#{trid}")
             result
           end
         end
