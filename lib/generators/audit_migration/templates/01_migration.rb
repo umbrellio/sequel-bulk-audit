@@ -32,7 +32,23 @@ Sequel.migration do
         trid bigint;
       BEGIN
         SELECT txid_current() INTO trid;
-        EXECUTE 'SELECT * FROM __audit_info_' || trid::text INTO __audit_info;
+
+        begin
+          EXECUTE 'SELECT * FROM __audit_info_' || trid::text INTO __audit_info;
+        exception when others then
+          CASE TG_OP
+          WHEN 'UPDATE' THEN
+            return NEW;
+          WHEN 'DELETE' THEN
+            return OLD;
+          WHEN 'INSERT' THEN
+            return NEW;
+          ELSE
+            RAISE WARNING '[AUDIT.IF_MODIFIED_FUNC] - Other action occurred: %, at %',TG_OP,now();
+            RETURN NULL;
+          END CASE;  
+        end;
+
         FOR ri IN
           SELECT column_name
           FROM information_schema.columns
