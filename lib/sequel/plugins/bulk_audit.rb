@@ -15,7 +15,7 @@ module Sequel
           ObjectSpace.each_object(Sequel::Model::ClassMethods).select do |klazz|
             next if klazz.name.nil?
             klazz < Sequel::Model && klazz&.plugins&.include?(Sequel::Plugins::BulkAudit)
-          end.map { |c| [c.to_s, c.implicit_table_name] }.to_h.invert
+          end.map { |c| [c.to_s, c.table_name] }.to_h.invert
         end
 
         def with_current_user(current_user, attributes = nil)
