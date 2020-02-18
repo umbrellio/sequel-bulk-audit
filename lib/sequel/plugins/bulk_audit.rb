@@ -1,44 +1,51 @@
+# frozen_string_literal: true
+
 require "sequel/plugins/bulk_audit/version"
 require 'sequel/model'
 
 module Sequel
   module Plugins
     module BulkAudit
-      def self.apply(model, opts={})
-        model.instance_eval do
-          @excluded_columns = [*opts[:excluded_columns]]
-        end
-      end
+      module ClassMethods
+        def with_current_user(current_user, attributes = {})
+          db.transaction do
+            data = db.select(
+              Sequel.expr(current_user&.id || 0).as(:user_id),
+              Sequel.cast(current_user&.login || "unspecified", :text).as(:username),
+              Sequel.expr(name).as(:model_name),
+              Sequel.pg_array(stringified_columns).as(:columns),
+              Sequel.pg_jsonb(attributes).as(:data),
+            )
 
-      module SharedMethods
-        def model_to_table_map
-          @@model_to_table_map ||= ObjectSpace.each_object(Class).select do |klazz|
-            next if klazz.name.nil?
-            klazz < Sequel::Model && klazz&.plugins&.include?(Sequel::Plugins::BulkAudit)
-          end.map { |c| [c.to_s, c.table_name] }.to_h.invert
-        end
+            create_temp_table(data)
 
-        def with_current_user(current_user, attributes = nil)
-          self.db.transaction do
-            trid = self.db.select(Sequel.function(:txid_current)).single_value
-            data = self.db.select(Sequel.expr(current_user&.id || 0).as(:user_id),
-                             Sequel.cast(current_user&.login || "unspecified", :text).as(:username),
-                             Sequel.pg_jsonb(model_to_table_map).as(:model_map),
-                             Sequel.pg_jsonb(attributes || {}).as(:data))
-            self.db.create_table!(:"__audit_info_#{trid}", temp: true, as: data)
-            result = yield if block_given?
-            self.db.drop_table?(:"__audit_info_#{trid}")
-            result
+            yield if block_given?
           end
         end
-      end
 
-      module ClassMethods
-        include SharedMethods
-      end
+        def trid
+          db.get(Sequel.function(:txid_current))
+        end
 
-      module InstanceMethods
-        include SharedMethods
+        def create_temp_table(data)
+          db.create_table!(audit_logs_temp_table_name, on_commit: :drop, temp: true, as: data)
+        end
+
+        def stringified_columns
+          columns.map(&:to_s)
+        end
+
+        # uses trid so temp table would be unique between transactions
+        # uses table_name so temp table would be unique if several models are audited at once
+        def audit_logs_temp_table_name
+          "__#{table_name_with_schema}_audit_info_#{trid}".to_sym
+        end
+
+        def table_name_with_schema
+          return "public_#{table_name}" if table_name.is_a?(Symbol)
+     
+          "#{table_name.table}_#{table_name.column}" # for QualifiedIdentifier
+        end
       end
     end
   end

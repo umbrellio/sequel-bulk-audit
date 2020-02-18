@@ -3,6 +3,7 @@ require "sequel"
 require "sequel/extensions/migration"
 require "sequel-bulk-audit"
 require "sequel/plugins/bulk_audit"
+require "seed_helper"
 require 'yaml'
 
 DB_NAME = (ENV['DB_NAME'] || "audit_test").freeze
@@ -18,8 +19,12 @@ rescue Sequel::DatabaseConnectionError => e
 end
 
 DB = connect
+
 Sequel.extension :core_extensions
+
 DB.extension :pg_json
+DB.extension :pg_array
+
 ::Sequel::Migrator.run(DB, 'lib/generators/audit_migration/templates')
 
 RSpec.configure do |config|
@@ -33,27 +38,9 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
-  config.before(:all) do
-    data = YAML.load(IO.read("spec/fixtures/data.yml"))
-    DB.drop_table?(:data)
-    DB.create_table(:data) do
-      primary_key :id
-      DateTime :created_at
-      DateTime :updated_at
-      String :value
-    end
-    DB[:data].multi_insert(data)
-    id = DB[:data].max(:id) + 1
-    DB.execute(<<-SQL)
-      ALTER SEQUENCE data_id_seq RESTART WITH #{id};
-    SQL
-    DB.run <<~SQL
-      CREATE TRIGGER audit_changes_on_data BEFORE INSERT OR UPDATE OR DELETE ON data
-      FOR EACH ROW EXECUTE PROCEDURE audit_changes();
-    SQL
-  end
-
-  config.after(:all) do
-    DB.drop_table?(:data)
+  config.before(:each) do
+    SeedHelper.clear_audit_logs
+    SeedHelper.drop_data
+    SeedHelper.prepare_data_table
   end
 end

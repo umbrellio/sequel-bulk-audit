@@ -1,18 +1,8 @@
-# sequel-bulk-audit [![Build Status](https://travis-ci.org/fiscal-cliff/sequel-bulk-audit.svg?branch=master)](https://travis-ci.org/fiscal-cliff/sequel-bulk-audit)
+# sequel-bulk-audit [![Build Status](https://travis-ci.org/umbrellio/sequel-bulk-audit.svg?branch=master)](https://travis-ci.org/umbrellio/sequel-bulk-audit)
 
-This gem allows you to track any changes in your tables. This approach not only is suitable for model updates but also enables you to track dataset updates.
+This gem allows you to track any changes in your tables. This approach is not only suitable for model updates but also enables you to track dataset updates.
 
-You should wrap your updating code as follows:
-
-```ruby
-Model.with_current_user(current_user) do
-  Model.where(...).update(...)
-end
-```
-
-Method #with_current_user expects current_user to be an object (or record) having attributes id and login
-
-You are able setup polymorphic associations between audit records and corresponding records.
+Method #with_current_user expects current_user to be an object (or record) having attributes id and login. It sets user_id as 0 and login as "unspecified" by default.
 
 ## Installation
 
@@ -30,21 +20,36 @@ Or install it yourself as:
 
     $ gem install sequel-bulk-audit
 
-After Installation you should run ```rails g audit_migration``` generator.
+After installation you should run ```rails g audit_migration``` generator.
 
 You can exdend this migration by attaching the trigger to audited tables.
 
+Please note, that this gem reqires pg_array and pg_json sequel extensions to work.
+
 ## Usage
 
-Models, changes in which you plan to audit should contain
+Models with audited changes should contain:
+
 ```ruby
 plugin :bulk_audit
 ```
 
-Method #with_current_user should wrap all the operations on the table.
+Method #with_current_user should wrap all the operations on the table. You must use method from the model you are changing for this gem to work correclty. 
+
+Keep in mind that everything wraped in #with_current_user will happen in one transaction.
+
+Correct usage:
 
 ```ruby
 Model.with_current_user(current_user) do
+  Model.where(...).update(...)
+end
+```
+
+Incorrect usage:
+
+```ruby
+SomeOtherModel.with_current_user(current_user) do
   Model.where(...).update(...)
 end
 ```
@@ -57,4 +62,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/fiscal-cliff/sequel-bulk-audit.
+Bug reports and pull requests are welcome on GitHub at https://github.com/umbrellio/sequel-bulk-audit.
