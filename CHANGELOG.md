@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 
 Recreate audit_changes() function with new changes.
 
+### Added
+
+- rubocop
+
 ### Changed
 
 - instead of creating model_to_table_map temp table now keeps just model_name

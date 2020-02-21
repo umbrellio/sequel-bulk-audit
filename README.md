@@ -46,6 +46,20 @@ Model.with_current_user(current_user) do
 end
 ```
 
+Correct usage for several models in one transaction:
+
+```ruby
+DB.transaction do
+  Model.with_current_user(current_user) do # will create temp table for model
+    Model.where(...).update(...)
+  end
+
+  OtherModel.with_current_user(current_user) do # will create temp table for other_model
+    OtherModel.where(...).update(...)
+  end
+end
+```
+
 Incorrect usage:
 
 ```ruby

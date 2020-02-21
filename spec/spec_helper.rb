@@ -1,18 +1,20 @@
+# frozen_string_literal: true
+
 require "bundler/setup"
 require "sequel"
 require "sequel/extensions/migration"
 require "sequel-bulk-audit"
 require "sequel/plugins/bulk_audit"
 require "seed_helper"
-require 'yaml'
+require "yaml"
 
-DB_NAME = (ENV['DB_NAME'] || "audit_test").freeze
+DB_NAME = (ENV["DB_NAME"] || "audit_test").freeze
 
 def connect
   Sequel.connect("postgres:///#{DB_NAME}")
-rescue Sequel::DatabaseConnectionError => e
-  raise unless e.message.include? "database \"#{DB_NAME}\" does not exist"
-  Sequel.connect('postgres:///postgres') do |connect|
+rescue Sequel::DatabaseConnectionError => error
+  raise unless error.message.include? "database \"#{DB_NAME}\" does not exist"
+  Sequel.connect("postgres:///postgres") do |connect|
     connect.run("create database #{DB_NAME}")
   end
   Sequel.connect("postgres:///#{DB_NAME}")
@@ -25,7 +27,7 @@ Sequel.extension :core_extensions
 DB.extension :pg_json
 DB.extension :pg_array
 
-::Sequel::Migrator.run(DB, 'lib/generators/audit_migration/templates')
+::Sequel::Migrator.run(DB, "lib/generators/audit_migration/templates")
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -38,9 +40,8 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
-  config.before(:each) do
+  config.before do
     SeedHelper.clear_audit_logs
-    SeedHelper.drop_data
-    SeedHelper.prepare_data_table
+    SeedHelper.new(:data).prepare_table
   end
 end

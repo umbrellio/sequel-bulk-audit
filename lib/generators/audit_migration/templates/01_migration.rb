@@ -71,8 +71,9 @@ Sequel.migration do
         END CASE;
         INSERT INTO audit_logs ("model_type", "model_id", "event", "changed",
                                 "created_at", "user_id", "username", "query", "data")
-        VALUES (coalesce(__audit_info.model_name::TEXT, TG_TABLE_NAME::TEXT), model_id, TG_OP, changes, NOW(), __audit_info.user_id,
-                __audit_info.username, current_query(), __audit_info.data);
+        VALUES (coalesce(__audit_info.model_name::TEXT, TG_TABLE_NAME::TEXT), model_id, TG_OP,
+                changes, NOW(), __audit_info.user_id, __audit_info.username, current_query(),
+                __audit_info.data);
         RETURN return_record;
       END;
     SQL

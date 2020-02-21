@@ -1,48 +1,53 @@
 # frozen_string_literal: true
 
-module SeedHelper
-  class << self
-    def prepare_data_table
-      drop_data
-      create_data
-      seed_data
-      restart_data_seq
-      create_trigger_on_data
-    end
+class SeedHelper
+  attr_reader :table_name
 
-    def create_data
-      DB.create_table(:data) do
-        primary_key :id
-        String      :value
-      end
-    end
+  def self.clear_audit_logs
+    DB.tables.include?(:audit_logs) && DB[:audit_logs].truncate
+  end
 
-    def seed_data
-      data = YAML.load(IO.read("spec/fixtures/data.yml"))
-      DB[:data].multi_insert(data)
-    end
+  def initialize(table_name)
+    @table_name = table_name.to_sym
+  end
 
-    def restart_data_seq
-      id = DB[:data].max(:id) + 1
+  def prepare_table
+    drop_table
+    create_table
+    seed_table
+    restart_table_seq
+    create_trigger_on_table
+  end
 
-      DB.execute(<<-SQL)
-        ALTER SEQUENCE data_id_seq RESTART WITH #{id};
-      SQL
+  def create_table
+    DB.create_table(table_name) do
+      primary_key :id
+      String      :value
     end
+  end
 
-    def create_trigger_on_data
-      DB.run <<~SQL
-        CREATE TRIGGER audit_changes_on_data BEFORE INSERT OR UPDATE OR DELETE ON data
-        FOR EACH ROW EXECUTE PROCEDURE audit_changes();
-      SQL
-    end
+  def seed_table
+    data = YAML.load(IO.read("spec/fixtures/data.yml"))
+    DB[table_name].multi_insert(data)
+  end
 
-    def drop_data
-      DB.drop_table?(:data)
-    end
+  def restart_table_seq
+    id = DB[table_name].max(:id) + 1
 
-    def clear_audit_logs
-      DB.tables.include?(:audit_logs) && DB[:audit_logs].truncate
-    end
+    DB.execute(<<-SQL)
+      ALTER SEQUENCE #{table_name}_id_seq RESTART WITH #{id};
+    SQL
+  end
+
+  def create_trigger_on_table
+    DB.run <<~SQL
+      CREATE TRIGGER audit_changes_on_#{table_name}
+      BEFORE INSERT OR UPDATE OR DELETE ON #{table_name}
+      FOR EACH ROW EXECUTE PROCEDURE audit_changes();
+    SQL
+  end
+
+  def drop_table
+    DB.drop_table?(table_name)
   end
 end

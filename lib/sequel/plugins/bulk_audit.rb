@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "sequel/plugins/bulk_audit/version"
-require 'sequel/model'
+require "sequel/model"
 
 module Sequel
   module Plugins
@@ -43,7 +43,7 @@ module Sequel
 
         def table_name_with_schema
           return "public_#{table_name}" if table_name.is_a?(Symbol)
-     
+
           "#{table_name.table}_#{table_name.column}" # for QualifiedIdentifier
         end
       end
