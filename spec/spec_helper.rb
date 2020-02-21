@@ -3,7 +3,7 @@
 require "bundler/setup"
 require "sequel"
 require "sequel/extensions/migration"
-require "sequel-bulk-audit"
+require "sequel_bulk_audit"
 require "sequel/plugins/bulk_audit"
 require "seed_helper"
 require "yaml"
