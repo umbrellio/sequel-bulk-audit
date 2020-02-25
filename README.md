@@ -68,6 +68,10 @@ SomeOtherModel.with_current_user(current_user) do
 end
 ```
 
+## Migration from 0.2.0 to 1.0.0
+
+Recreate audit_changes() function with new changes.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

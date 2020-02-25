@@ -3,10 +3,6 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.0] - 2020-02-18
 
-### Migration from 0.2.0 to 1.0.0
-
-Recreate audit_changes() function with new changes.
-
 ### Added
 
 - rubocop
