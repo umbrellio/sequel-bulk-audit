@@ -23,7 +23,7 @@ Sequel.migration do
     create_function(:audit_changes, <<~SQL, returns: :trigger, language: :plpgsql, replace: true)
       DECLARE
         changes jsonb := '{}'::jsonb;
-        ri RECORD;
+        column_name text;
         n jsonb;
         o jsonb;
         __audit_info RECORD;
@@ -32,28 +32,26 @@ Sequel.migration do
         trid bigint;
       BEGIN
         SELECT txid_current() INTO trid;
-        EXECUTE 'SELECT * FROM __audit_info_' || trid::text INTO __audit_info;
-        FOR ri IN
-          SELECT column_name
-          FROM information_schema.columns
-          WHERE
-              table_schema = quote_ident(TG_TABLE_SCHEMA)
-          AND table_name = quote_ident(TG_TABLE_NAME)
-          ORDER BY ordinal_position
+
+        EXECUTE CONCAT(
+          'SELECT * FROM __', TG_TABLE_SCHEMA, '_', TG_TABLE_NAME, '_audit_info_', trid::text
+        ) INTO __audit_info;
+
+        FOREACH column_name IN ARRAY __audit_info.columns
         LOOP
           IF (TG_OP = 'UPDATE') THEN
-            EXECUTE 'SELECT to_jsonb(($1).' || ri.column_name || ')' INTO n USING NEW;
-            EXECUTE 'SELECT to_jsonb(($1).' || ri.column_name || ')' INTO o USING OLD;
+            EXECUTE 'SELECT to_jsonb(($1).' || column_name || ')' INTO n USING NEW;
+            EXECUTE 'SELECT to_jsonb(($1).' || column_name || ')' INTO o USING OLD;
             IF (o != n) THEN
-              SELECT changes || jsonb_build_object(ri.column_name, ARRAY[o, n]) INTO changes;
+              SELECT changes || jsonb_build_object(column_name, ARRAY[o, n]) INTO changes;
             END IF;
           ELSE
             IF (TG_OP = 'DELETE') THEN
-              EXECUTE 'SELECT to_jsonb(($1).' || ri.column_name || ')' INTO n USING OLD;
+              EXECUTE 'SELECT to_jsonb(($1).' || column_name || ')' INTO n USING OLD;
             ELSIF (TG_OP = 'INSERT') THEN
-              EXECUTE 'SELECT to_jsonb(($1).' || ri.column_name || ')' INTO n USING NEW;
+              EXECUTE 'SELECT to_jsonb(($1).' || column_name || ')' INTO n USING NEW;
             END IF;
-            SELECT changes || jsonb_build_object(ri.column_name, n) INTO changes;
+            SELECT changes || jsonb_build_object(column_name, n) INTO changes;
           END IF;
         END LOOP;
 
@@ -73,8 +71,9 @@ Sequel.migration do
         END CASE;
         INSERT INTO audit_logs ("model_type", "model_id", "event", "changed",
                                 "created_at", "user_id", "username", "query", "data")
-        VALUES (coalesce((__audit_info.model_map ->> TG_TABLE_NAME::TEXT), TG_TABLE_NAME::TEXT), model_id, TG_OP, changes, NOW(), __audit_info.user_id,
-                __audit_info.username, current_query(), __audit_info.data);
+        VALUES (coalesce(__audit_info.model_name::TEXT, TG_TABLE_NAME::TEXT), model_id, TG_OP,
+                changes, NOW(), __audit_info.user_id, __audit_info.username, current_query(),
+                __audit_info.data);
         RETURN return_record;
       END;
     SQL
