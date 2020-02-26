@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- rubocop
+- integration with rubocop ecosystem
 
 ### Changed
 
