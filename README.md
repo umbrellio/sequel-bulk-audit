@@ -1,4 +1,4 @@
-# sequel-bulk-audit [![Build Status](https://travis-ci.org/umbrellio/sequel-bulk-audit.svg?branch=master)](https://travis-ci.org/umbrellio/sequel-bulk-audit)
+# sequel-bulk-audit [![Gem Version](https://badge.fury.io/rb/sequel-bulk-audit.svg)](https://badge.fury.io/rb/sequel-bulk-audit) [![Build Status](https://travis-ci.org/umbrellio/sequel-bulk-audit.svg?branch=master)](https://travis-ci.org/umbrellio/sequel-bulk-audit)
 
 This gem allows you to track any changes in your tables. This approach is not only suitable for model updates but also enables you to track dataset updates.
 
